@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import { connectDB } from "./config/db";
 
 dotenv.config();
 const app = express();
@@ -10,6 +11,14 @@ app.get("/", (_req, res) => {
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server listening on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error("Failed to connect to Postgres:", err);
+    process.exit(1);
+  });
