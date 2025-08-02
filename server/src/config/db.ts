@@ -1,14 +1,8 @@
-import { Client } from "pg";
-import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client";
 
-dotenv.config();
-
-export const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-});
+export const prisma = new PrismaClient();
 
 export async function connectDB() {
-  await client.connect();
-  console.log("Connected to Postgres");
-  return client;
+  await prisma.$connect();
+  console.log("Connected to Postgres via Prisma");
 }
