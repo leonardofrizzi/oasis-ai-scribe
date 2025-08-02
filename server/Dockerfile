@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package*.json tsconfig.json ./
 RUN npm install
 COPY . .
-RUN npx prisma generate    # se ainda precisar do client gerado em build
+RUN npx prisma generate    
 RUN npm run build
 
 FROM node:18-alpine
