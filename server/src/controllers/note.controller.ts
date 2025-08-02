@@ -51,3 +51,38 @@ export const createNote: RequestHandler = async (req, res) => {
   });
   return res.status(201).json(note);
 };
+
+export const updateNote: RequestHandler = async (req, res) => {
+  const id = Number(req.params.id);
+  const { transcriptText, oasisFields } = req.body;
+  const data: { transcriptText?: string; oasisFields?: Record<string, any> } = {};
+  if (transcriptText !== undefined) data.transcriptText = transcriptText;
+  if (oasisFields !== undefined) data.oasisFields = oasisFields;
+  try {
+    const updated = await prisma.note.update({
+      where: { id },
+      data
+    });
+    return res.json(updated);
+  } catch (err: any) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ error: "Note not found" });
+    }
+    console.error("Error updating note:", err);
+    return res.status(500).json({ error: "Failed to update note" });
+  }
+};
+
+export const deleteNote: RequestHandler = async (req, res) => {
+  const id = Number(req.params.id);
+  try {
+    await prisma.note.delete({ where: { id } });
+    return res.status(204).send();
+  } catch (err: any) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ error: "Note not found" });
+    }
+    console.error("Error deleting note:", err);
+    return res.status(500).json({ error: "Failed to delete note" });
+  }
+};
