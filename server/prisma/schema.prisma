@@ -12,17 +12,15 @@ model Patient {
   name      String
   dob       DateTime
   createdAt DateTime @default(now())
-
   notes     Note[]
 }
 
 model Note {
-  id              Int      @id @default(autoincrement())
-  patientId       Int
-  transcriptRaw   String
-  transcriptText  String?
-  oasisFields     Json
-  createdAt       DateTime @default(now())
-
-  patient         Patient  @relation(fields: [patientId], references: [id])
+  id             Int      @id @default(autoincrement())
+  patientId      Int
+  transcriptRaw  String
+  transcriptText String?
+  oasisFields    Json
+  createdAt      DateTime @default(now())
+  patient        Patient  @relation(fields: [patientId], references: [id])
 }
