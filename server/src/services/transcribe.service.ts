@@ -2,26 +2,29 @@ import fetch from "node-fetch";
 import FormData from "form-data";
 
 const OPENAI_URL = "https://api.openai.com/v1/audio/transcriptions";
-const MODEL = "whisper-1";
+const API_KEY = process.env.OPENAI_API_KEY!;
 
-export async function transcribeAudio(buffer: Buffer, filename: string, mimeType: string): Promise<string> {
+export async function transcribeAudio(
+  audioBuffer: Buffer,
+  filename: string,
+  mimetype: string
+): Promise<string> {
   const form = new FormData();
-  form.append("file", buffer, { filename, contentType: mimeType });
-  form.append("model", MODEL);
+  form.append("file", audioBuffer, { filename, contentType: mimetype });
+  form.append("model", "whisper-1");
 
   const res = await fetch(OPENAI_URL, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+      Authorization: `Bearer ${API_KEY}`,
     },
-    body: form as any
+    body: form as any,
   });
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Whisper API error ${res.status}: ${err}`);
+    throw new Error(`Whisper failed: ${res.status} ${err}`);
   }
-
-  const { text } = await res.json() as { text: string };
-  return text;
+  const data = await res.json();
+  return data.text as string;
 }

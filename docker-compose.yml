@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   db:
     image: postgres:15
@@ -8,15 +10,17 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"  
+      - "5433:5432"
+
   api:
     image: oasisai-api:latest
     build:
       context: ./server
       dockerfile: Dockerfile
+    env_file:
+      - ./server/.env
     environment:
       DATABASE_URL: postgresql://postgres:password@db:5432/oasisdb
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
     ports:
       - "4000:4000"
     depends_on:
