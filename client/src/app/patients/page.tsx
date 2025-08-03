@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
 
 type Patient = { id: number; name: string; dob: string };
@@ -45,15 +46,16 @@ export default function PatientsPage() {
           </div>
         ) : (
           filtered.map((p) => (
-            <div
-              key={p.name}
-              className="flex justify-between items-center px-6 py-4 border-b last:border-b-0"
+            <Link
+              key={p.id}
+              href={`/patients/${p.id}`}
+              className="flex justify-between items-center px-6 py-4 border-b last:border-b-0 hover:bg-gray-50 transition"
             >
               <span className="text-gray-800">{p.name}</span>
               <span className="text-gray-600">
                 {new Date(p.dob).toLocaleDateString("en-GB")}
               </span>
-            </div>
+            </Link>
           ))
         )}
       </div>
