@@ -25,13 +25,22 @@ services:
       - "4000:4000"
     depends_on:
       - db
+    volumes:
+      - ./server:/app
 
   client:
     build:
       context: ./client
       dockerfile: Dockerfile
+    env_file:
+      - ./client/.env
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api:4000
     ports:
       - "3000:3000"
+    volumes:
+      - ./client/public:/app/public:ro
+      - ./client/.env:/app/.env:ro
     depends_on:
       - api
 

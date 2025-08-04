@@ -9,16 +9,27 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.get("/", (_req, res) => res.send("API is running"));
 app.use("/patients", patientRoutes);
 app.use("/notes", noteRoutes);
 
-connectDB().catch((err) => {
-  console.error("DB connection failed:", err);
-  process.exit(1);
-});
+const PORT = process.env.PORT || 4000;
 
-export default app;
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("DB connection failed:", err);
+    process.exit(1);
+  });

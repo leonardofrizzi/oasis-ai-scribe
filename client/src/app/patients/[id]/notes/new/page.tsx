@@ -28,12 +28,17 @@ export default function NewNotePage({ params }: any) {
       `${process.env.NEXT_PUBLIC_API_URL}/notes`,
       { method: "POST", body: form }
     );
+
     if (!res.ok) {
       setError(`Failed to create note (${res.status})`);
       setSubmitting(false);
       return;
     }
+
     const data = await res.json();
+
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
     router.push(`/patients/${patientId}/notes/${data.id}`);
   }
 

@@ -1,4 +1,8 @@
+'use client';
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type Note = {
   id: number;
@@ -14,31 +18,67 @@ type Patient = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default async function Page({ params }: any) {
+export default function Page({ params }: any) {
   const { id: patientId, noteId } = params;
+  const router = useRouter();
+  const [note, setNote] = useState<Note | null>(null);
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const [noteRes, patientRes] = await Promise.all([
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/${noteId}`, {
-      cache: "no-store",
-    }),
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/patients/${patientId}`, {
-      cache: "no-store",
-    }),
-  ]);
+const baseUrl =
+  typeof window !== "undefined"
+    ? "http://localhost:4000" 
+    : process.env.NODE_ENV === "development"
+    ? "http://host.docker.internal:4000" 
+    : "http://api:4000"; 
 
-  if (!noteRes.ok || !patientRes.ok) {
+  useEffect(() => {
+    const fetchData = async () => {
+      const [noteRes, patientRes] = await Promise.all([
+        fetch(`${baseUrl}/notes/${noteId}`),
+        fetch(`${baseUrl}/patients/${patientId}`),
+      ]);
+
+      if (!noteRes.ok || !patientRes.ok) {
+        setError("Failed to load data.");
+        return;
+      }
+
+      setNote(await noteRes.json());
+      setPatient(await patientRes.json());
+    };
+
+    fetchData();
+  }, []);
+
+  const handleDelete = async () => {
+    const confirmed = confirm("Are you sure you want to delete this note?");
+    if (!confirmed) return;
+
+    const res = await fetch(`${baseUrl}/notes/${noteId}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      router.push(`/patients/${patientId}`);
+    } else {
+      alert("Failed to delete the note.");
+    }
+  };
+
+  if (error) {
     return (
       <div className="p-8 text-red-600">
-        Failed to load data.
+        {error}
         <br />
         <Link href={`/patients/${patientId}`}>← Back to patient</Link>
       </div>
     );
   }
 
-  const note: Note = await noteRes.json();
-  const patient: Patient = await patientRes.json();
-  const fields = note.oasisFields;
+  if (!note || !patient) {
+    return <div className="p-8">Loading...</div>;
+  }
 
   return (
     <div className="py-8 px-4">
@@ -51,9 +91,9 @@ export default async function Page({ params }: any) {
 
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-2">Transcript</h2>
-        <pre className="p-4 bg-white rounded shadow overflow-auto">
+        <div className="p-4 bg-white rounded shadow whitespace-pre-wrap break-words">
           {note.transcriptText ?? note.transcriptRaw}
-        </pre>
+        </div>
       </section>
 
       <section>
@@ -66,7 +106,7 @@ export default async function Page({ params }: any) {
             </tr>
           </thead>
           <tbody>
-            {Object.entries(fields).map(([key, val]) => (
+            {Object.entries(note.oasisFields).map(([key, val]) => (
               <tr key={key} className="border-t">
                 <td className="p-2 font-medium">{key}</td>
                 <td className="p-2">{val}</td>
@@ -83,12 +123,20 @@ export default async function Page({ params }: any) {
         >
           ← Back
         </Link>
+
         <Link
           href={`/patients/${patientId}/notes/${noteId}/edit`}
           className="px-4 py-2 bg-black text-white rounded hover:opacity-90"
         >
           Edit Note
         </Link>
+
+        <button
+          onClick={handleDelete}
+          className="px-4 py-2 bg-red-600 text-white rounded hover:opacity-90"
+        >
+          Delete Note
+        </button>
       </div>
     </div>
   );

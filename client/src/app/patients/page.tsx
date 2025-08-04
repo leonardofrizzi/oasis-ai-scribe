@@ -11,7 +11,10 @@ export default function PatientsPage() {
   const [query, setQuery] = useState("");
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/patients`)
+    const baseUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+    fetch(`${baseUrl}/patients`)
       .then((res) => {
         if (!res.ok) throw new Error(`Error ${res.status}`);
         return res.json();

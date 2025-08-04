@@ -6,7 +6,7 @@ async function main() {
     data: [
       { name: "John Doe",     dob: new Date("1975-04-12") },
       { name: "Jane Smith",   dob: new Date("1980-11-30") },
-      { name: "Carlos Silva", dob: new Date("1992-07-19") },
+      { name: "Robert Johnson", dob: new Date("1992-07-19") },
     ],
     skipDuplicates: true,
   });
