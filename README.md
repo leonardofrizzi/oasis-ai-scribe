@@ -1,6 +1,7 @@
 # AI Scribe for Home Health OASIS Assessments
 
-**Access online**: 👉 http://44.211.255.104:3000
+**🎥 Watch the presentation**: [Oasis AI Scribe - Demo Video](https://vimeo.com/1107209554)  
+**🌐 Access online**: 👉 http://44.211.255.104:3000
 
 ---
 
