@@ -26,5 +26,14 @@ services:
     depends_on:
       - db
 
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
 volumes:
   db-data:

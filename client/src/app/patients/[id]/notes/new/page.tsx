@@ -3,11 +3,8 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
-type Props = {
-  params: { id: string };
-};
-
-export default function NewNotePage({ params }: Props) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function NewNotePage({ params }: any) {
   const router = useRouter();
   const patientId = params.id;
 

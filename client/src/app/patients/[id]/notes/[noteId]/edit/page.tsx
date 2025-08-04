@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 
 type OasisFields = Record<
@@ -9,13 +9,11 @@ type OasisFields = Record<
   string
 >;
 
-type Props = {
-  params: { id: string; noteId: string };
-};
-
-export default function EditNotePage({ params }: Props) {
-  const { id: patientId, noteId } = params;
+export default function EditNotePage() {
   const router = useRouter();
+  const params = useParams();
+  const patientId = params.id as string;
+  const noteId = params.noteId as string;
 
   const [transcriptText, setTranscriptText] = useState("");
   const [oasisFields, setOasisFields] = useState<OasisFields>({

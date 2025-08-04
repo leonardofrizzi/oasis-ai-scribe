@@ -1,7 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type Note = {
@@ -17,43 +13,31 @@ type Patient = {
   name: string;
 };
 
-export default function NoteDetailPage({
-  params,
-}: {
-  params: { id: string; noteId: string };
-}) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function Page({ params }: any) {
   const { id: patientId, noteId } = params;
-  const [note, setNote] = useState<Note | null>(null);
-  const [patient, setPatient] = useState<Patient | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/${noteId}`),
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/patients/${patientId}`),
-    ])
-      .then(async ([nRes, pRes]) => {
-        if (!nRes.ok) throw new Error("Failed to fetch note");
-        if (!pRes.ok) throw new Error("Failed to fetch patient");
-        const n: Note = await nRes.json();
-        const p: Patient = await pRes.json();
-        setNote(n);
-        setPatient(p);
-      })
-      .catch((err) => setError(err.message));
-  }, [patientId, noteId]);
+  const [noteRes, patientRes] = await Promise.all([
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/${noteId}`, {
+      cache: "no-store",
+    }),
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/patients/${patientId}`, {
+      cache: "no-store",
+    }),
+  ]);
 
-  if (error)
+  if (!noteRes.ok || !patientRes.ok) {
     return (
       <div className="p-8 text-red-600">
-        {error} <br />
+        Failed to load data.
+        <br />
         <Link href={`/patients/${patientId}`}>← Back to patient</Link>
       </div>
     );
+  }
 
-  if (!note || !patient)
-    return <p className="p-8">Loading note details…</p>;
-
+  const note: Note = await noteRes.json();
+  const patient: Patient = await patientRes.json();
   const fields = note.oasisFields;
 
   return (

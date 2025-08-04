@@ -15,11 +15,8 @@ type Note = {
   createdAt: string;
 };
 
-export default function PatientDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function PatientDetailPage({ params }: any) {
   const { id } = params;
   const [patient, setPatient] = useState<Patient | null>(null);
   const [notes, setNotes] = useState<Note[]>([]);
