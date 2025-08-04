@@ -3,26 +3,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-type Patient = {
-  id: number;
-  name: string;
-  dob: string;
-  createdAt: string;
-};
-
-type Note = {
-  id: number;
-  createdAt: string;
-};
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function PatientDetailPage({ params }: any) {
   const { id } = params;
-  const [patient, setPatient] = useState<Patient | null>(null);
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [patient, setPatient] = useState<{
+    id: number;
+    name: string;
+    dob: string;
+    createdAt: string;
+  } | null>(null);
+  const [notes, setNotes] = useState<
+    { id: number; createdAt: string }[]
+  >([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchData = () => {
     Promise.all([
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/patients/${id}`),
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/patients/${id}/notes`),
@@ -36,16 +31,35 @@ export default function PatientDetailPage({ params }: any) {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [id]);
 
+  const handleDelete = async (noteId: number) => {
+    if (!confirm("Are you sure you want to delete this note?")) return;
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/${noteId}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setNotes((prev) => prev.filter((note) => note.id !== noteId));
+    } else {
+      alert("Failed to delete note");
+    }
+  };
+
   if (loading) return <p>Loading…</p>;
-  if (!patient) return <p>Paciente não encontrado.</p>;
+  if (!patient) return <p>Patient not found.</p>;
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">{patient.name}</h1>
       <p className="text-gray-600">
-        DOB: {new Date(patient.dob).toLocaleDateString()}<br/>
+        DOB: {new Date(patient.dob).toLocaleDateString()}
+        <br />
         Joined: {new Date(patient.createdAt).toLocaleDateString()}
       </p>
 
@@ -59,16 +73,26 @@ export default function PatientDetailPage({ params }: any) {
               key={note.id}
               className="flex justify-between items-center p-4 bg-white rounded shadow mb-2"
             >
-              <span>Note #{note.id}</span>
-              <span className="text-gray-500 text-sm">
-                {new Date(note.createdAt).toLocaleString()}
-              </span>
-              <Link
-                href={`/patients/${id}/notes/${note.id}`}
-                className="text-black hover:underline"
-              >
-                View
-              </Link>
+              <div>
+                <span>Note #{note.id}</span>
+                <span className="block text-gray-500 text-sm">
+                  {new Date(note.createdAt).toLocaleString()}
+                </span>
+              </div>
+              <div className="flex gap-3">
+                <Link
+                  href={`/patients/${id}/notes/${note.id}`}
+                  className="text-black hover:underline"
+                >
+                  View
+                </Link>
+                <button
+                  onClick={() => handleDelete(note.id)}
+                  className="text-red-600 hover:underline"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))
         )}

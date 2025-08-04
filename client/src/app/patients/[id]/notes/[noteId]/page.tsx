@@ -25,29 +25,29 @@ export default function Page({ params }: any) {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-const baseUrl =
-  typeof window !== "undefined"
-    ? "http://localhost:4000" 
-    : process.env.NODE_ENV === "development"
-    ? "http://host.docker.internal:4000" 
-    : "http://api:4000"; 
+  const baseUrl =
+    typeof window !== "undefined"
+      ? process.env.NEXT_PUBLIC_API_URL
+      : process.env.NODE_ENV === "development"
+      ? "http://host.docker.internal:4000"
+      : "http://api:4000";
+
+  const fetchData = async () => {
+    const [noteRes, patientRes] = await Promise.all([
+      fetch(`${baseUrl}/notes/${noteId}`),
+      fetch(`${baseUrl}/patients/${patientId}`),
+    ]);
+
+    if (!noteRes.ok || !patientRes.ok) {
+      setError("Failed to load data.");
+      return;
+    }
+
+    setNote(await noteRes.json());
+    setPatient(await patientRes.json());
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const [noteRes, patientRes] = await Promise.all([
-        fetch(`${baseUrl}/notes/${noteId}`),
-        fetch(`${baseUrl}/patients/${patientId}`),
-      ]);
-
-      if (!noteRes.ok || !patientRes.ok) {
-        setError("Failed to load data.");
-        return;
-      }
-
-      setNote(await noteRes.json());
-      setPatient(await patientRes.json());
-    };
-
     fetchData();
   }, []);
 

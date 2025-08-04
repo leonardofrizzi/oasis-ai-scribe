@@ -45,6 +45,7 @@ export default function EditNotePage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/notes/${noteId}`,
       {
@@ -53,11 +54,15 @@ export default function EditNotePage() {
         body: JSON.stringify({ transcriptText, oasisFields }),
       }
     );
+
     if (!res.ok) {
       setError(`Failed to update (${res.status})`);
       return;
     }
-    router.push(`/patients/${patientId}/notes/${noteId}`);
+
+    // Redireciona para a página do paciente e força o refresh
+    router.push(`/patients/${patientId}`);
+    router.refresh();
   }
 
   if (loading) return <p className="p-8">Loading…</p>;
@@ -66,7 +71,10 @@ export default function EditNotePage() {
   return (
     <div className="py-8 px-4">
       <h1 className="text-2xl font-bold mb-4">Edit Note #{noteId}</h1>
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white shadow rounded-lg p-6">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 bg-white shadow rounded-lg p-6"
+      >
         <div>
           <label className="block mb-1 font-medium">Transcript</label>
           <textarea
